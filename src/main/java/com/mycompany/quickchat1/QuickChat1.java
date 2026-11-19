@@ -107,7 +107,7 @@ public class QuickChat1 {
                         System.out.println("2) Disregard Message");
                         System.out.println("3) Store Message to send later");
                         int messageOption = readNumber(scanner, "Choose an option: ");
-                        while (messageOption < 1 && messageOption > 3) {
+                        while (messageOption < 1 || messageOption > 3) {
                             System.out.println("Please choose 1, 2 or 3.");
                             messageOption = readNumber(scanner, "Choose an option: ");
                         }

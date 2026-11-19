@@ -93,7 +93,7 @@ public class Login {
     }
 
     // Shared cell number check, so the Message class can reuse the SAME regex.
-    // "+" then the country code, then 9 digits, with NO spaces, e.g. +27838968976
+    // South African number: "+27" then exactly 9 digits, with NO spaces, e.g. +27838968976
     // Reference: Adapted from https://www.baeldung.com/java-regex-validate-phone-numbers
     public static boolean isValidCellNumber(String number) {
         String regex = "^\\+27\\d{9}$";
