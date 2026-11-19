@@ -1,6 +1,6 @@
 # QuickChat
 
-**Student:** Masego Mangwejane – YOUR-STUDENT-NUMBER
+**Student:** Masego Mangwejane – ST10512888
 **Module:** PROG5121 (Programming 1A)
 
 A console chat app for PROG5121 (Programming 1A). Users register, log in, send, store or
