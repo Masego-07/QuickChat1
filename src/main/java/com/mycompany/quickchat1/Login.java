@@ -96,7 +96,7 @@ public class Login {
     // "+" then the country code, then 9 digits, with NO spaces, e.g. +27838968976
     // Reference: Adapted from https://www.baeldung.com/java-regex-validate-phone-numbers
     public static boolean isValidCellNumber(String number) {
-        String regex = "^\\+\\d{1,3}\\d{9}$";
+        String regex = "^\\+27\\d{9}$";
         return number != null && Pattern.matches(regex, number);
     }
 
