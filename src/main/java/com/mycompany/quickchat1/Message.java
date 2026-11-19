@@ -25,9 +25,13 @@ import java.util.Random;
 // Message class; stores, validates,and processes QuickChat messages.
 
 public class Message {
-    private  static int totalMessagesSent = 0;
+    private static int totalMessagesSent = 0;
     private static final List<String> sentMessages = new ArrayList<>();
-    
+
+    // The JSON file that stored messages are saved to.
+    // Unit tests change this to a test file so the real file is not filled with test data.
+    private static String storageFile = "storedMessages.json";
+
     String messageID;
     int messageNumber;
     String recipient;
@@ -40,20 +44,21 @@ public Message (int messageNumber, String recipient, String messageText){
    this.messageNumber = messageNumber;
    this.recipient = recipient;
    this.messageText = messageText;
-   this.messageID = generateMesssageID();
+   this.messageID = generateMessageID();
    this.messageHash = createMessageHash();
-    
+
 }
-    
-//Builds a random 10-digit ID using a loop 
-public static String generateMesssageID(){
+
+// Builds a random 10-digit ID using string manipulation.
+// 1. Make a random number between 0 and 9 999 999 999 (a long, because an int is too small).
+// 2. Put ten zeros in front of it so it is never shorter than ten digits.
+// 3. Use substring to keep only the LAST ten characters.
+// Example: 48213 -> "000000000048213" -> "0000048213"
+public static String generateMessageID(){
     Random random = new Random();
-    StringBuilder id = new StringBuilder();
-    for (int i =0; i< 10; i++){
-        id.append(random.nextInt(10));
-    }
-    return id.toString();
-    
+    long number = (long) (random.nextDouble() * 10_000_000_000L);
+    String padded = "0000000000" + number;
+    return padded.substring(padded.length() - 10);
 }
 //Used by unit tests to set a known ID (Hash is updated too)
 public void setMessageID(String messageID){
@@ -63,24 +68,23 @@ public void setMessageID(String messageID){
 //ID must not be more than ten characters
 public boolean checkMessageID(){
 return messageID != null && messageID.length() <= 10;
-}   
+}
 //Message must not be more than 250 characters
 public String checkMessageLength (){
     if (messageText.length()<=250){
         return "Message ready to send.";
-       
+
     }
     int over = messageText.length() - 250;
-    return  "Message exceeds 250 characters by" + over + ";please reduce the size.";
+    return "Message exceeds 250 characters by " + over + "; please reduce the size.";
 }
-//Reuse the same regex from the login class
+//Reuses the same regex as the Login class (Login.isValidCellNumber)
 public String checkRecipientCell(){
-    if (recipient.matches("^\\+27 [0-9]{9}$")){
-  return "Cell phone number successfully captured.";
-  
-}
-    return "Cell phone number is inccorrectly formatted or does not contain an international code."
-            + "please correct the number and try again";
+    if (Login.isValidCellNumber(recipient)){
+        return "Cell phone number successfully captured.";
+    }
+    return "Cell phone number is incorrectly formatted or does not contain an international code. "
+            + "Please correct the number and try again.";
 }
 
 //First 2 digits of ID: message number: FIRSTLAST word, all caps
@@ -121,6 +125,9 @@ public String createMessageHash() {
 
     // All messages sent while the program is running
     public static String printMessages() {
+        if (sentMessages.isEmpty()) {
+            return "No messages have been sent yet.";
+        }
         return String.join("\n\n", sentMessages);
     }
 
@@ -129,15 +136,24 @@ public String createMessageHash() {
         return totalMessagesSent;
     }
 
+    // Lets the unit tests use their own JSON file
+    public static void setStorageFile(String fileName) {
+        storageFile = fileName;
+    }
+
+    public static String getStorageFile() {
+        return storageFile;
+    }
+
     /*
-     * Stores this message in storedMessages.json
+     * Stores this message in the JSON file (storedMessages.json)
      * Reference: [1] Google, "Gson User Guide," GitHub. [Online].
      * Available: https://github.com/google/gson/blob/main/UserGuide.md
      * [Accessed: Oct. 19, 2026].
      */
     public void storeMessage() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        File file = new File("storedMessages.json");
+        File file = new File(storageFile);
         List<Message> messages = new ArrayList<>();
 
         // Load existing messages so they are not overwritten
@@ -154,17 +170,16 @@ public String createMessageHash() {
         }
 
         messages.add(this);
-try (Writer writer = new FileWriter(file)) {
-    gson.toJson(messages, writer);
-} catch (IOException e) {
-    System.out.println("Error saving message: " + e.getMessage());
-}
-        
-}
+        try (Writer writer = new FileWriter(file)) {
+            gson.toJson(messages, writer);
+        } catch (IOException e) {
+            System.out.println("Error saving message: " + e.getMessage());
+        }
+
+    }
    // Getters
     public String getMessageID() { return messageID; }
     public String getMessageHash() { return messageHash; }
     public String getRecipient() { return recipient; }
-    public String getMessage() { return messageText; } 
+    public String getMessage() { return messageText; }
 }
-
